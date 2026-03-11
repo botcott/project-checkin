@@ -33,7 +33,7 @@ th.today-mark { background-color: var(--accent) !important; color: white !import
 
 /* Значки отработки */
 .duty-status-mark {
-    position: absolute; top: 1px; left: 1px; font-size: 17px; width: 20px; height: 20px;
+    position: absolute; top: 1px; left: 1px; font-size: 17px; width: 23px; height: 23px;
     display: flex; align-items: center; justify-content: center; border-radius: 4px;
     background: white; z-index: 6; cursor: pointer;
 }
