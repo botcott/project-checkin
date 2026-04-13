@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -8,11 +9,14 @@
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json"> <!-- PWA -->
 </head>
+
 <body data-theme="light">
     <div id="main-content">
         <!-- Экран Групп -->
         <section id="group-screen" class="screen active">
-            <header><h1 class="center-title">Мои Группы</h1></header>
+            <header>
+                <h1 class="center-title">Мои Группы</h1>
+            </header>
             <div id="group-list" class="grid-list"></div>
         </section>
 
@@ -27,7 +31,9 @@
             </header>
             <div class="table-container">
                 <table id="attendance-table">
-                    <thead><tr id="header-row"></tr></thead>
+                    <thead>
+                        <tr id="header-row"></tr>
+                    </thead>
                     <tbody id="table-body"></tbody>
                 </table>
             </div>
@@ -52,9 +58,10 @@
         <div class="modal-card">
             <h3>Настройки</h3>
             <button id="btn-theme-toggle" class="ui-btn full-width">Тема 🌓</button>
-            
+
             <div style="margin: 15px 0; padding-top: 10px; border-top: 1px solid var(--border);">
-                <button id="btn-install-app" class="ui-btn full-width hidden" style="background:#ffc107; color:#333;">Установить приложение 📲</button>
+                <button id="btn-install-app" class="ui-btn full-width hidden"
+                    style="background:#ffc107; color:#333;">Установить приложение 📲</button>
                 <h4 style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 8px; text-transform: uppercase;">Данные</h4>
                 <button id="btn-export" class="ui-btn full-width" style="background:#28a745;">Экспорт 📥</button>
                 <button id="btn-import" class="ui-btn full-width" style="background:#17a2b8;">Импорт 📤</button>
@@ -69,7 +76,7 @@
                 <p>Маркин Илья</p>
                 <p>Пермяков Арсений</p>
                 <p>Васильев Богдан</p>
-                
+
             </div>
 
             <div class="social-links">
@@ -77,7 +84,7 @@
                 <a href="https://t.me/thisnicknamewastaken" target="_blank" class="soc-btn tg">Telegram</a>
                 <a href="https://github.com/botcott" target="_blank" class="soc-btn gh">GitHub</a>
             </div>
-            
+
             <button id="btn-close-settings" class="ui-btn full-width secondary">Закрыть</button>
         </div>
     </div>
@@ -89,7 +96,8 @@
             <div id="duty-list-display" style="margin: 20px 0; min-height: 50px;"></div>
             <div style="margin-bottom: 20px;">
                 <label style="font-size: 0.8rem; opacity: 0.7;">Количество:</label>
-                <input type="number" id="duty-qty" value="2" min="1" max="10" style="width: 50px; padding: 5px; text-align: center; border-radius: 5px; border: 1px solid var(--border);">
+                <input type="number" id="duty-qty" value="2" min="1" max="10"
+                    style="width: 50px; padding: 5px; text-align: center; border-radius: 5px; border: 1px solid var(--border);">
             </div>
             <button id="btn-refresh-duty" class="ui-btn full-width">Обновить</button>
             <button id="btn-close-duty" class="ui-btn full-width secondary">Закрыть</button>
@@ -98,4 +106,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

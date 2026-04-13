@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
+
     // Показываем кнопку установки в настройках, если открыто в браузере
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const installBtn = document.getElementById('btn-install-app');
@@ -62,7 +62,7 @@ function render() {
 
     if (currentGroupId === null) {
         gScreen.classList.add('active'); aScreen.classList.remove('active'); aScreen.classList.add('hidden');
-        if(dutyBtn) dutyBtn.style.display = 'none';
+        if (dutyBtn) dutyBtn.style.display = 'none';
         const list = document.getElementById('group-list');
         list.innerHTML = '';
         Object.keys(groups).forEach(id => {
@@ -73,7 +73,7 @@ function render() {
         });
     } else {
         gScreen.classList.remove('active'); aScreen.classList.remove('hidden'); aScreen.classList.add('active');
-        if(dutyBtn) dutyBtn.style.display = 'flex';
+        if (dutyBtn) dutyBtn.style.display = 'flex';
         document.getElementById('current-group-title').textContent = currentGroupId;
         initMonthPicker(); renderTableHeaders();
 
@@ -96,10 +96,10 @@ function render() {
                 return `<td class="cell-${val}">
                     ${val === 'О' ? `<div class="duty-status-mark ${solved ? 'mark-solved' : 'mark-unsolved'}" data-row="${idx}" data-day="${d}">${solved ? '✓' : '×'}</div>` : ''}
                     <select class="status-select" data-row="${idx}" data-day="${d}">
-                        <option value="" ${val===''?'selected':''}>-</option>
-                        <option value="Б" ${val==='Б'?'selected':''}>Б</option>
-                        <option value="О" ${val==='О'?'selected':''}>О</option>
-                        <option value="Н" ${val==='Н'?'selected':''}>Н</option>
+                        <option value="" ${val === '' ? 'selected' : ''}>-</option>
+                        <option value="Б" ${val === 'Б' ? 'selected' : ''}>Б</option>
+                        <option value="О" ${val === 'О' ? 'selected' : ''}>О</option>
+                        <option value="Н" ${val === 'Н' ? 'selected' : ''}>Н</option>
                     </select></td>`;
             }).join('');
             tr.innerHTML = `<td class="sticky-col"><button class="btn-del-row" data-del-row="${idx}">×</button><span contenteditable="true" class="edit-name" data-idx="${idx}" data-placeholder="Введите ФИО...">${row.name}</span></td>${cells}`;
@@ -141,11 +141,11 @@ function updateDuty() {
 // 7. Обработка кликов
 document.addEventListener('click', async (e) => {
     const t = e.target;
-    
+
     if (t.classList.contains('group-card')) { currentGroupId = t.dataset.id; render(); }
     if (t.dataset.delGroup) { if (confirm("Удалить группу и ВСЮ историю?")) { delete groups[t.dataset.delGroup]; save(); render(); } }
     if (t.dataset.delRow !== undefined) { if (confirm("Удалить строку?")) { groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1); save(); render(); } }
-    
+
     // Переключатель отработки (Крестик / Галочка)
     if (t.classList.contains('duty-status-mark')) {
         const r = t.dataset.row, d = t.dataset.day;
@@ -165,7 +165,7 @@ document.addEventListener('click', async (e) => {
     }
 
     if (t.id === 'btn-back') { currentGroupId = null; render(); }
-    if (t.id === 'btn-duty-open') { if(currentGroupId) { updateDuty(); document.getElementById('duty-modal').classList.remove('hidden'); } }
+    if (t.id === 'btn-duty-open') { if (currentGroupId) { updateDuty(); document.getElementById('duty-modal').classList.remove('hidden'); } }
     if (t.id === 'btn-close-duty' || t.id === 'duty-modal') document.getElementById('duty-modal').classList.add('hidden');
     if (t.id === 'btn-open-settings') document.getElementById('settings-modal').classList.remove('hidden');
     if (t.id === 'btn-close-settings' || t.id === 'settings-modal') document.getElementById('settings-modal').classList.add('hidden');
@@ -214,11 +214,11 @@ document.getElementById('btn-import').onclick = () => document.getElementById('i
 document.getElementById('import-file').onchange = (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => {
-        try { 
-            groups = JSON.parse(ev.target.result); 
-            save(); 
-            location.reload(); 
-        } catch(err) { alert("Ошибка файла"); }
+        try {
+            groups = JSON.parse(ev.target.result);
+            save();
+            location.reload();
+        } catch (err) { alert("Ошибка файла"); }
     };
     reader.readAsText(e.target.files[0]);
 };
