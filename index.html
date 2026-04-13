@@ -102,6 +102,31 @@
         </div>
     </div>
 
+    <!-- КАСТОМНОЕ ОКНО ВВОДА (Prompt) -->
+    <div id="custom-prompt-modal" class="modal hidden">
+        <div class="modal-card" style="max-width: 300px;">
+            <h3 id="prompt-title"><i class="fas fa-pencil-alt"></i> Ввод</h3>
+            <input type="text" id="prompt-input" class="prompt-input-field" placeholder="Введите значение..." autocomplete="off">
+            <div class="prompt-error" id="prompt-error"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="prompt-confirm" class="ui-btn" style="flex: 1; margin: 0;"><i class="fas fa-check"></i> ОК</button>
+                <button id="prompt-cancel" class="ui-btn secondary" style="flex: 1; margin: 0;"><i class="fas fa-times"></i> Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- КАСТОМНОЕ ОКНО ПОДТВЕРЖДЕНИЯ (Confirm) -->
+    <div id="custom-confirm-modal" class="modal hidden">
+        <div class="modal-card" style="max-width: 300px;">
+            <h3 id="confirm-title"><i class="fas fa-question-circle"></i> Подтверждение</h3>
+            <p id="confirm-message" style="margin: 15px 0; word-break: break-word;">Вы уверены?</p>
+            <div style="display: flex; gap: 10px;">
+                <button id="confirm-yes" class="ui-btn" style="flex: 1; margin: 0; background: var(--n-color);"><i class="fas fa-check"></i> Да</button>
+                <button id="confirm-no" class="ui-btn secondary" style="flex: 1; margin: 0;"><i class="fas fa-times"></i> Нет</button>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 

@@ -61,18 +61,39 @@ body {
 
 /* --- АНИМАЦИИ --- */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes popIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 /* Анимация для модальных окон */
@@ -99,7 +120,7 @@ body {
     padding: 20px;
     border-radius: 25px;
     text-align: center;
-    box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
     animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -107,17 +128,35 @@ body {
 .group-card-wrapper {
     position: relative;
     animation: slideUp 0.3s ease-out forwards;
-    opacity: 0; /* Начальное состояние для анимации */
+    opacity: 0;
+    /* Начальное состояние для анимации */
     animation-delay: calc(0.05s * var(--i, 1));
 }
 
 /* Задержки для карточек будут заданы в JS, но можно и так */
-.grid-list .group-card-wrapper:nth-child(1) { --i: 1; }
-.grid-list .group-card-wrapper:nth-child(2) { --i: 2; }
-.grid-list .group-card-wrapper:nth-child(3) { --i: 3; }
-.grid-list .group-card-wrapper:nth-child(4) { --i: 4; }
-.grid-list .group-card-wrapper:nth-child(5) { --i: 5; }
-.grid-list .group-card-wrapper:nth-child(6) { --i: 6; }
+.grid-list .group-card-wrapper:nth-child(1) {
+    --i: 1;
+}
+
+.grid-list .group-card-wrapper:nth-child(2) {
+    --i: 2;
+}
+
+.grid-list .group-card-wrapper:nth-child(3) {
+    --i: 3;
+}
+
+.grid-list .group-card-wrapper:nth-child(4) {
+    --i: 4;
+}
+
+.grid-list .group-card-wrapper:nth-child(5) {
+    --i: 5;
+}
+
+.grid-list .group-card-wrapper:nth-child(6) {
+    --i: 6;
+}
 
 header {
     padding: 45px 15px 15px;
@@ -162,7 +201,11 @@ header {
     z-index: 50;
     transition: var(--transition);
 }
-.back-btn-icon:active { transform: scale(0.9); color: var(--accent-dark); }
+
+.back-btn-icon:active {
+    transform: scale(0.9);
+    color: var(--accent-dark);
+}
 
 .grid-list {
     padding: 20px;
@@ -183,7 +226,11 @@ header {
     transition: var(--transition);
     cursor: pointer;
 }
-.group-card:active { transform: scale(0.97); background: var(--border); }
+
+.group-card:active {
+    transform: scale(0.97);
+    background: var(--border);
+}
 
 .btn-del {
     position: absolute;
@@ -201,10 +248,14 @@ header {
     align-items: center;
     justify-content: center;
     z-index: 100;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: var(--transition);
 }
-.btn-del:active { transform: scale(0.9); background: #c0392b; }
+
+.btn-del:active {
+    transform: scale(0.9);
+    background: #c0392b;
+}
 
 .table-container {
     overflow: auto;
@@ -255,7 +306,10 @@ th.today-mark {
     margin-right: 5px;
     transition: var(--transition);
 }
-.btn-del-row:active { transform: scale(0.8); }
+
+.btn-del-row:active {
+    transform: scale(0.8);
+}
 
 /* Значки отработки */
 .duty-status-mark {
@@ -273,12 +327,24 @@ th.today-mark {
     cursor: pointer;
     transition: var(--transition);
 }
-.duty-status-mark:active { transform: scale(0.8); }
 
-.mark-unsolved { color: var(--n-color); font-weight: 900; }
-.mark-solved { color: var(--b-color); font-weight: 900; }
+.duty-status-mark:active {
+    transform: scale(0.8);
+}
 
-td:not(.cell-О) .duty-status-mark { display: none; }
+.mark-unsolved {
+    color: var(--n-color);
+    font-weight: 900;
+}
+
+.mark-solved {
+    color: var(--b-color);
+    font-weight: 900;
+}
+
+td:not(.cell-О) .duty-status-mark {
+    display: none;
+}
 
 [contenteditable="true"]:empty:before {
     content: attr(data-placeholder);
@@ -296,7 +362,10 @@ td:not(.cell-О) .duty-status-mark { display: none; }
     border-radius: 4px;
     transition: background 0.2s;
 }
-.edit-name:focus { background: rgba(0,123,255,0.1); }
+
+.edit-name:focus {
+    background: rgba(0, 123, 255, 0.1);
+}
 
 .status-select {
     width: 100%;
@@ -311,12 +380,25 @@ td:not(.cell-О) .duty-status-mark { display: none; }
     cursor: pointer;
 }
 
-td.cell-Б { background: var(--b-color); }
-td.cell-О { background: var(--o-color); }
-td.cell-Н { background: var(--n-color); }
+td.cell-Б {
+    background: var(--b-color);
+}
 
-td[class^="cell-"] select { color: white; }
-td.cell-О select { color: black; }
+td.cell-О {
+    background: var(--o-color);
+}
+
+td.cell-Н {
+    background: var(--n-color);
+}
+
+td[class^="cell-"] select {
+    color: white;
+}
+
+td.cell-О select {
+    color: black;
+}
 
 .dockbar {
     position: fixed;
@@ -361,7 +443,11 @@ td.cell-О select { color: black; }
     align-items: center;
     justify-content: center;
 }
-.circle-add-btn:active { transform: scale(0.9); box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4); }
+
+.circle-add-btn:active {
+    transform: scale(0.9);
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4);
+}
 
 .clean-btn {
     background: none;
@@ -377,7 +463,11 @@ td.cell-О select { color: black; }
     align-items: center;
     justify-content: center;
 }
-.clean-btn:active { background: var(--border); transform: scale(0.9); }
+
+.clean-btn:active {
+    background: var(--border);
+    transform: scale(0.9);
+}
 
 /* Кнопки UI */
 .ui-btn {
@@ -396,10 +486,19 @@ td.cell-О select { color: black; }
     justify-content: center;
     gap: 8px;
 }
-.ui-btn:active { transform: scale(0.97); filter: brightness(0.9); }
-.ui-btn i { font-size: 1.1em; }
 
-.secondary { background: #6c757d; }
+.ui-btn:active {
+    transform: scale(0.97);
+    filter: brightness(0.9);
+}
+
+.ui-btn i {
+    font-size: 1.1em;
+}
+
+.secondary {
+    background: #6c757d;
+}
 
 .duty-name {
     font-size: 1.2rem;
@@ -417,6 +516,7 @@ td.cell-О select { color: black; }
     padding-top: 10px;
     border-top: 1px solid var(--border);
 }
+
 .authors-info h4 {
     margin: 0;
     font-size: 0.8rem;
@@ -425,6 +525,7 @@ td.cell-О select { color: black; }
     align-items: center;
     gap: 5px;
 }
+
 .authors-info p {
     margin: 5px 0 10px;
     font-weight: bold;
@@ -438,6 +539,7 @@ td.cell-О select { color: black; }
     gap: 8px;
     margin-bottom: 15px;
 }
+
 .soc-btn {
     text-decoration: none;
     color: white;
@@ -452,6 +554,75 @@ td.cell-О select { color: black; }
     justify-content: center;
     gap: 8px;
 }
-.soc-btn:active { transform: scale(0.97); opacity: 0.9; }
-.tg { background: #0088cc; }
-.gh { background: #333; }
+
+.soc-btn:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+}
+
+.tg {
+    background: #0088cc;
+}
+
+.gh {
+    background: #333;
+}
+
+/* --- Стили для кастомных диалогов --- */
+
+.prompt-input-field {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    margin: 10px 0 5px;
+    outline: none;
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+
+.prompt-input-field:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.prompt-error {
+    color: var(--n-color);
+    font-size: 0.8rem;
+    min-height: 20px;
+    margin-bottom: 5px;
+    font-weight: 500;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+#custom-confirm-modal .modal-card {
+    text-align: center;
+}
+
+#confirm-message {
+    line-height: 1.5;
+}
+
+/* Анимация появления ошибки */
+.prompt-error:not(:empty) {
+    animation: fadeIn 0.2s ease;
+}

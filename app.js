@@ -1,14 +1,114 @@
 let groups = JSON.parse(localStorage.getItem('attendance_archive_v1')) || {};
 let currentGroupId = null;
-let currentMonthKey = new Date().toISOString().slice(0, 7); // Формат "2026-02"
+let currentMonthKey = new Date().toISOString().slice(0, 7);
 let deferredPrompt;
 
-// 1. РЕГИСТРАЦИЯ SERVICE WORKER
+// ========== КАСТОМНЫЕ ДИАЛОГИ ==========
+const promptModal = document.getElementById('custom-prompt-modal');
+const promptInput = document.getElementById('prompt-input');
+const promptTitle = document.getElementById('prompt-title');
+const promptError = document.getElementById('prompt-error');
+const promptConfirm = document.getElementById('prompt-confirm');
+const promptCancel = document.getElementById('prompt-cancel');
+
+const confirmModal = document.getElementById('custom-confirm-modal');
+const confirmTitle = document.getElementById('confirm-title');
+const confirmMessage = document.getElementById('confirm-message');
+const confirmYes = document.getElementById('confirm-yes');
+const confirmNo = document.getElementById('confirm-no');
+
+let currentPromptResolver = null;
+let currentConfirmResolver = null;
+
+// Функция показа кастомного prompt
+function showCustomPrompt(title, placeholder = '', defaultValue = '', validator = null) {
+    return new Promise((resolve) => {
+        currentPromptResolver = resolve;
+        promptTitle.innerHTML = `<i class="fas fa-pencil-alt"></i> ${title}`;
+        promptInput.placeholder = placeholder;
+        promptInput.value = defaultValue;
+        promptError.textContent = '';
+        promptModal.classList.remove('hidden');
+        promptInput.focus();
+        
+        // Сохраняем валидатор
+        promptInput.dataset.validator = validator ? true : false;
+        promptInput.validator = validator;
+    });
+}
+
+// Функция показа кастомного confirm
+function showCustomConfirm(title, message, isDanger = false) {
+    return new Promise((resolve) => {
+        currentConfirmResolver = resolve;
+        confirmTitle.innerHTML = `<i class="fas fa-${isDanger ? 'exclamation-triangle' : 'question-circle'}"></i> ${title}`;
+        confirmMessage.textContent = message;
+        if (isDanger) {
+            confirmYes.style.background = 'var(--n-color)';
+        } else {
+            confirmYes.style.background = 'var(--accent)';
+        }
+        confirmModal.classList.remove('hidden');
+    });
+}
+
+// Закрытие prompt
+function closePrompt(value) {
+    promptModal.classList.add('hidden');
+    if (currentPromptResolver) {
+        currentPromptResolver(value);
+        currentPromptResolver = null;
+    }
+    promptInput.value = '';
+    promptError.textContent = '';
+}
+
+// Закрытие confirm
+function closeConfirm(value) {
+    confirmModal.classList.add('hidden');
+    if (currentConfirmResolver) {
+        currentConfirmResolver(value);
+        currentConfirmResolver = null;
+    }
+}
+
+// Обработчики для prompt
+promptConfirm.addEventListener('click', () => {
+    const value = promptInput.value.trim();
+    const validator = promptInput.validator;
+    
+    if (validator && !validator(value)) {
+        promptError.textContent = 'Некорректное значение!';
+        promptInput.focus();
+        return;
+    }
+    closePrompt(value);
+});
+
+promptCancel.addEventListener('click', () => closePrompt(null));
+promptInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') promptConfirm.click();
+    if (e.key === 'Escape') promptCancel.click();
+});
+
+// Обработчики для confirm
+confirmYes.addEventListener('click', () => closeConfirm(true));
+confirmNo.addEventListener('click', () => closeConfirm(false));
+
+// Закрытие по клику на фон
+promptModal.addEventListener('click', (e) => {
+    if (e.target === promptModal) closePrompt(null);
+});
+confirmModal.addEventListener('click', (e) => {
+    if (e.target === confirmModal) closeConfirm(false);
+});
+
+// ========== SERVICE WORKER ==========
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.log("SW error:", err));
 }
 
-// 2. ЛОГИКА ПРЕДЛОЖЕНИЯ УСТАНОВКИ
+// ========== PWA УСТАНОВКА ==========
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -20,7 +120,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
     }
 });
 
-// 3. Инициализация выбора месяца
+// ========== ИНИЦИАЛИЗАЦИЯ МЕСЯЦА ==========
 function initMonthPicker() {
     const select = document.getElementById('month-select');
     if (!select) return;
@@ -36,7 +136,7 @@ function initMonthPicker() {
     }
 }
 
-// 4. Отрисовка дат месяца
+// ========== ОТРИСОВКА ЗАГОЛОВКОВ ==========
 function renderTableHeaders() {
     const headerRow = document.getElementById('header-row');
     headerRow.innerHTML = '<th class="sticky-col">ФИО</th>';
@@ -53,15 +153,18 @@ function renderTableHeaders() {
     }
 }
 
-// 5. Основной рендер
+// ========== ОСНОВНОЙ РЕНДЕР ==========
 function render() {
     const gScreen = document.getElementById('group-screen');
     const aScreen = document.getElementById('attendance-screen');
     const dutyBtn = document.getElementById('btn-duty-open');
 
     if (currentGroupId === null) {
-        gScreen.classList.add('active'); aScreen.classList.remove('active'); aScreen.classList.add('hidden');
+        gScreen.classList.add('active'); 
+        aScreen.classList.remove('active'); 
+        aScreen.classList.add('hidden');
         if (dutyBtn) dutyBtn.style.display = 'none';
+        
         const list = document.getElementById('group-list');
         list.innerHTML = '';
         Object.keys(groups).forEach(id => {
@@ -71,22 +174,29 @@ function render() {
             list.appendChild(wrap);
         });
     } else {
-        gScreen.classList.remove('active'); aScreen.classList.remove('hidden'); aScreen.classList.add('active');
+        gScreen.classList.remove('active'); 
+        aScreen.classList.remove('hidden'); 
+        aScreen.classList.add('active');
         if (dutyBtn) dutyBtn.style.display = 'flex';
+        
         document.getElementById('current-group-title').textContent = currentGroupId;
-        initMonthPicker(); renderTableHeaders();
+        initMonthPicker(); 
+        renderTableHeaders();
 
-        // Авто-перенос имен из прошлого месяца
         if (!groups[currentGroupId][currentMonthKey]) {
             const monthKeys = Object.keys(groups[currentGroupId]).sort();
             const lastMonthKey = monthKeys[monthKeys.length - 1];
             const prevMonthData = lastMonthKey ? groups[currentGroupId][lastMonthKey] : [];
             const [y, m] = currentMonthKey.split('-').map(Number);
-            groups[currentGroupId][currentMonthKey] = prevMonthData.map(row => ({ name: row.name, data: Array(new Date(y, m, 0).getDate()).fill("") }));
+            groups[currentGroupId][currentMonthKey] = prevMonthData.map(row => ({ 
+                name: row.name, 
+                data: Array(new Date(y, m, 0).getDate()).fill("") 
+            }));
             save();
         }
 
-        const body = document.getElementById('table-body'); body.innerHTML = '';
+        const body = document.getElementById('table-body'); 
+        body.innerHTML = '';
         groups[currentGroupId][currentMonthKey].forEach((row, idx) => {
             const tr = document.createElement('tr');
             let cells = row.data.map((valObj, d) => {
@@ -107,7 +217,7 @@ function render() {
     }
 }
 
-// 6. ГЛОБАЛЬНЫЙ ПРИОРИТЕТ ДЕЖУРНЫХ
+// ========== ДЕЖУРНЫЕ ==========
 function updateDuty() {
     const qty = parseInt(document.getElementById('duty-qty').value) || 2;
     let priority = [];
@@ -133,41 +243,107 @@ function updateDuty() {
     const sortedOthers = [...others.slice(rotation), ...others.slice(0, rotation)];
     const finalDuty = [...priority, ...sortedOthers].slice(0, qty);
 
-    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n => `<div class="duty-name"><i class="fas fa-user-check"></i> ${n}</div>`).join('');
+    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n => 
+        `<div class="duty-name"><i class="fas fa-user-check"></i> ${n}</div>`
+    ).join('');
 }
 
-// 7. Обработка кликов
+// ========== ОБРАБОТКА КЛИКОВ (С КАСТОМНЫМИ ДИАЛОГАМИ) ==========
 document.addEventListener('click', async (e) => {
-    const t = e.target.closest('button') || e.target; // Улучшенный поиск клика по иконке внутри кнопки
+    const t = e.target.closest('button') || e.target;
 
-    if (t.classList.contains('group-card')) { currentGroupId = t.dataset.id; render(); }
-    if (t.dataset.delGroup) { if (confirm("Удалить группу и ВСЮ историю?")) { delete groups[t.dataset.delGroup]; save(); render(); } }
-    if (t.dataset.delRow !== undefined) { if (confirm("Удалить строку?")) { groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1); save(); render(); } }
+    // Открытие группы
+    if (t.classList.contains('group-card')) { 
+        currentGroupId = t.dataset.id; 
+        render(); 
+    }
+    
+    // Удаление группы
+    if (t.dataset.delGroup) { 
+        const confirmed = await showCustomConfirm(
+            'Удаление группы', 
+            `Вы точно хотите удалить группу "${t.dataset.delGroup}" и ВСЮ её историю?`,
+            true
+        );
+        if (confirmed) {
+            delete groups[t.dataset.delGroup]; 
+            save(); 
+            render(); 
+        }
+    }
+    
+    // Удаление строки
+    if (t.dataset.delRow !== undefined) { 
+        const confirmed = await showCustomConfirm(
+            'Удаление студента', 
+            'Удалить этого студента из текущего месяца?',
+            true
+        );
+        if (confirmed) {
+            groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1); 
+            save(); 
+            render(); 
+        }
+    }
 
+    // Переключение отработки
     if (t.classList.contains('duty-status-mark')) {
         const r = t.dataset.row, d = t.dataset.day;
         const current = groups[currentGroupId][currentMonthKey][r].data[d];
         if (typeof current === 'object') current.solved = !current.solved;
-        save(); render();
+        save(); 
+        render();
     }
 
+    // Главная кнопка "+"
     if (t.id === 'btn-main-add') {
         if (!currentGroupId) {
-            const n = prompt("Название группы:"); if (n && !groups[n]) { groups[n] = {}; save(); render(); }
+            const groupName = await showCustomPrompt(
+                'Новая группа', 
+                'Например: Б20-301', 
+                '',
+                (val) => val.length > 0 && !groups[val]
+            );
+            
+            if (groupName) {
+                if (groups[groupName]) {
+                    promptError.textContent = 'Такая группа уже существует!';
+                } else {
+                    groups[groupName] = {}; 
+                    save(); 
+                    render();
+                }
+            }
         } else {
             const [y, m] = currentMonthKey.split('-').map(Number);
-            groups[currentGroupId][currentMonthKey].push({ name: "", data: Array(new Date(y, m, 0).getDate()).fill("") });
-            save(); render();
+            groups[currentGroupId][currentMonthKey].push({ 
+                name: "", 
+                data: Array(new Date(y, m, 0).getDate()).fill("") 
+            });
+            save(); 
+            render();
         }
     }
 
     if (t.id === 'btn-back') { currentGroupId = null; render(); }
-    if (t.id === 'btn-duty-open') { if (currentGroupId) { updateDuty(); document.getElementById('duty-modal').classList.remove('hidden'); } }
-    if (t.id === 'btn-close-duty' || t.id === 'duty-modal') document.getElementById('duty-modal').classList.add('hidden');
-    if (t.id === 'btn-open-settings') document.getElementById('settings-modal').classList.remove('hidden');
-    if (t.id === 'btn-close-settings' || t.id === 'settings-modal') document.getElementById('settings-modal').classList.add('hidden');
+    if (t.id === 'btn-duty-open') { 
+        if (currentGroupId) { 
+            updateDuty(); 
+            document.getElementById('duty-modal').classList.remove('hidden'); 
+        } 
+    }
+    if (t.id === 'btn-close-duty' || t.id === 'duty-modal') {
+        document.getElementById('duty-modal').classList.add('hidden');
+    }
+    if (t.id === 'btn-open-settings') {
+        document.getElementById('settings-modal').classList.remove('hidden');
+    }
+    if (t.id === 'btn-close-settings' || t.id === 'settings-modal') {
+        document.getElementById('settings-modal').classList.add('hidden');
+    }
     if (t.id === 'btn-refresh-duty') updateDuty();
 
+    // Переключение темы
     if (t.id === 'btn-theme-toggle' || t.closest('#btn-theme-toggle')) {
         const currentTheme = document.body.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -175,6 +351,7 @@ document.addEventListener('click', async (e) => {
         localStorage.setItem('theme', newTheme);
     }
 
+    // Установка PWA
     if (t.id === 'btn-install-app' && deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -183,46 +360,71 @@ document.addEventListener('click', async (e) => {
     }
 });
 
-// 8. Обработка изменений
+// ========== ОБРАБОТКА ИЗМЕНЕНИЙ ==========
 document.addEventListener('change', (e) => {
-    if (e.target.id === 'month-select') { currentMonthKey = e.target.value; render(); }
+    if (e.target.id === 'month-select') { 
+        currentMonthKey = e.target.value; 
+        render(); 
+    }
     if (e.target.classList.contains('status-select')) {
         const s = e.target;
         const val = s.value;
-        groups[currentGroupId][currentMonthKey][s.dataset.row].data[s.dataset.day] = (val === 'О') ? { status: 'О', solved: false } : val;
-        save(); render();
+        groups[currentGroupId][currentMonthKey][s.dataset.row].data[s.dataset.day] = 
+            (val === 'О') ? { status: 'О', solved: false } : val;
+        save(); 
+        render();
     }
 });
 
+// Редактирование имени
 document.addEventListener('focusout', (e) => {
     if (e.target.classList.contains('edit-name')) {
         const idx = e.target.getAttribute('data-idx');
-        groups[currentGroupId][currentMonthKey][idx].name = e.target.textContent; save();
+        groups[currentGroupId][currentMonthKey][idx].name = e.target.textContent; 
+        save();
     }
 });
 
-// 9. Экспорт/Импорт
+// ========== ЭКСПОРТ/ИМПОРТ ==========
 document.getElementById('btn-export').onclick = () => {
     const blob = new Blob([JSON.stringify(groups, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `academ_backup_${currentMonthKey}.json`; a.click();
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(blob);
+    a.download = `academ_backup_${currentMonthKey}.json`; 
+    a.click();
 };
 
 document.getElementById('btn-import').onclick = () => document.getElementById('import-file').click();
-document.getElementById('import-file').onchange = (e) => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        try {
-            groups = JSON.parse(ev.target.result);
-            save();
-            location.reload();
-        } catch (err) { alert("Ошибка файла"); }
-    };
-    reader.readAsText(e.target.files[0]);
+
+document.getElementById('import-file').onchange = async (e) => {
+    const confirmed = await showCustomConfirm(
+        'Импорт данных',
+        'Это заменит все текущие данные. Продолжить?',
+        true
+    );
+    
+    if (confirmed) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                groups = JSON.parse(ev.target.result);
+                save();
+                location.reload();
+            } catch (err) { 
+                alert("Ошибка: Неверный формат файла"); 
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    } else {
+        e.target.value = '';
+    }
 };
 
-function save() { localStorage.setItem('attendance_archive_v1', JSON.stringify(groups)); }
+function save() { 
+    localStorage.setItem('attendance_archive_v1', JSON.stringify(groups)); 
+}
 
+// ========== ЗАПУСК ==========
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
