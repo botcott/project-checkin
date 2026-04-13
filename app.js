@@ -435,7 +435,7 @@ document.getElementById('btn-export').onclick = () => {
     const blob = new Blob([JSON.stringify(groups, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `academ_backup_${currentMonthKey}.json`;
+    a.download = `checkin_backup_${currentMonthKey}.json`;
     a.click();
 };
 

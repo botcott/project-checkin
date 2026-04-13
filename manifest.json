@@ -1,9 +1,16 @@
 {
-  "name": "Tab",
+  "name": "CheckIn — Журнал посещаемости",
+  "short_name": "CheckIn",
+  "description": "Удобный журнал для учёта посещаемости студентов. Отметки Б/О/Н, список дежурных, история посещений",
   "start_url": "index.html",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f5f7fa",
   "theme_color": "#007bff",
+  "lang": "ru-RU",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "utilities"],
   "icons": [
     {
       "src": "icon.png",
