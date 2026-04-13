@@ -8,6 +8,8 @@
     --b-color: #2ecc71;
     --o-color: #f1c40f;
     --n-color: #e74c3c;
+    --shadow-sm: 0 4px 8px rgba(0, 0, 0, 0.05);
+    --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 [data-theme="dark"] {
@@ -17,6 +19,10 @@
     --border: #333;
 }
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: -apple-system, sans-serif;
@@ -24,6 +30,7 @@ body {
     color: var(--text);
     overflow: hidden;
     height: 100vh;
+    transition: background 0.3s ease;
 }
 
 #main-content {
@@ -39,6 +46,8 @@ body {
     display: none;
     flex-direction: column;
     z-index: 1;
+    /* Анимация появления экрана */
+    animation: fadeIn 0.25s ease-out;
 }
 
 .screen.active {
@@ -49,6 +58,66 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* --- АНИМАЦИИ --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Анимация для модальных окон */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal.hidden {
+    display: none !important;
+}
+
+.modal-card {
+    background: var(--card);
+    width: 60%;
+    max-width: 280px;
+    padding: 20px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 20px 30px rgba(0,0,0,0.2);
+    animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Анимация для карточек групп */
+.group-card-wrapper {
+    position: relative;
+    animation: slideUp 0.3s ease-out forwards;
+    opacity: 0; /* Начальное состояние для анимации */
+    animation-delay: calc(0.05s * var(--i, 1));
+}
+
+/* Задержки для карточек будут заданы в JS, но можно и так */
+.grid-list .group-card-wrapper:nth-child(1) { --i: 1; }
+.grid-list .group-card-wrapper:nth-child(2) { --i: 2; }
+.grid-list .group-card-wrapper:nth-child(3) { --i: 3; }
+.grid-list .group-card-wrapper:nth-child(4) { --i: 4; }
+.grid-list .group-card-wrapper:nth-child(5) { --i: 5; }
+.grid-list .group-card-wrapper:nth-child(6) { --i: 6; }
 
 header {
     padding: 45px 15px 15px;
@@ -79,6 +148,7 @@ header {
     font-weight: bold;
     font-size: 0.85rem;
     outline: none;
+    cursor: pointer;
 }
 
 .back-btn-icon {
@@ -90,7 +160,9 @@ header {
     position: absolute;
     left: 10px;
     z-index: 50;
+    transition: var(--transition);
 }
+.back-btn-icon:active { transform: scale(0.9); color: var(--accent-dark); }
 
 .grid-list {
     padding: 20px;
@@ -100,10 +172,6 @@ header {
     overflow-y: auto;
 }
 
-.group-card-wrapper {
-    position: relative;
-}
-
 .group-card {
     background: var(--card);
     padding: 30px 10px;
@@ -111,8 +179,11 @@ header {
     text-align: center;
     border: 1px solid var(--border);
     font-weight: 600;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    cursor: pointer;
 }
+.group-card:active { transform: scale(0.97); background: var(--border); }
 
 .btn-del {
     position: absolute;
@@ -130,7 +201,10 @@ header {
     align-items: center;
     justify-content: center;
     z-index: 100;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: var(--transition);
 }
+.btn-del:active { transform: scale(0.9); background: #c0392b; }
 
 .table-container {
     overflow: auto;
@@ -152,6 +226,7 @@ td {
     text-align: center;
     font-size: 0.9rem;
     position: relative;
+    transition: background 0.2s ease;
 }
 
 th.today-mark {
@@ -178,7 +253,9 @@ th.today-mark {
     font-size: 1.4rem;
     cursor: pointer;
     margin-right: 5px;
+    transition: var(--transition);
 }
+.btn-del-row:active { transform: scale(0.8); }
 
 /* Значки отработки */
 .duty-status-mark {
@@ -194,21 +271,14 @@ th.today-mark {
     border-color: black;
     z-index: 6;
     cursor: pointer;
+    transition: var(--transition);
 }
+.duty-status-mark:active { transform: scale(0.8); }
 
-.mark-unsolved {
-    color: var(--n-color);
-    font-weight: 900;
-}
+.mark-unsolved { color: var(--n-color); font-weight: 900; }
+.mark-solved { color: var(--b-color); font-weight: 900; }
 
-.mark-solved {
-    color: var(--b-color);
-    font-weight: 900;
-}
-
-td:not(.cell-О) .duty-status-mark {
-    display: none;
-}
+td:not(.cell-О) .duty-status-mark { display: none; }
 
 [contenteditable="true"]:empty:before {
     content: attr(data-placeholder);
@@ -222,7 +292,11 @@ td:not(.cell-О) .duty-status-mark {
     outline: none;
     display: inline-block;
     min-width: 20px;
+    padding: 4px 2px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
+.edit-name:focus { background: rgba(0,123,255,0.1); }
 
 .status-select {
     width: 100%;
@@ -234,27 +308,15 @@ td:not(.cell-О) .duty-status-mark {
     text-align-last: center;
     appearance: none;
     outline: none;
+    cursor: pointer;
 }
 
-td.cell-Б {
-    background: var(--b-color);
-}
+td.cell-Б { background: var(--b-color); }
+td.cell-О { background: var(--o-color); }
+td.cell-Н { background: var(--n-color); }
 
-td.cell-О {
-    background: var(--o-color);
-}
-
-td.cell-Н {
-    background: var(--n-color);
-}
-
-td[class^="cell-"] select {
-    color: white;
-}
-
-td.cell-О select {
-    color: black;
-}
+td[class^="cell-"] select { color: white; }
+td.cell-О select { color: black; }
 
 .dockbar {
     position: fixed;
@@ -266,6 +328,7 @@ td.cell-О select {
     display: flex;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(10px);
 }
 
 .dock-side {
@@ -293,7 +356,12 @@ td.cell-О select {
     top: -35px;
     cursor: pointer;
     box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+.circle-add-btn:active { transform: scale(0.9); box-shadow: 0 2px 5px rgba(0, 123, 255, 0.4); }
 
 .clean-btn {
     background: none;
@@ -301,32 +369,17 @@ td.cell-О select {
     font-size: 1.6rem;
     cursor: pointer;
     color: var(--text);
-}
-
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex !important;
+    transition: var(--transition);
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(3px);
 }
+.clean-btn:active { background: var(--border); transform: scale(0.9); }
 
-.modal.hidden {
-    display: none !important;
-}
-
-.modal-card {
-    background: var(--card);
-    width: 60%;
-    max-width: 280px;
-    padding: 20px;
-    border-radius: 25px;
-    text-align: center;
-}
-
+/* Кнопки UI */
 .ui-btn {
     width: 100%;
     padding: 12px;
@@ -337,11 +390,16 @@ td.cell-О select {
     color: white;
     font-weight: bold;
     cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
+.ui-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+.ui-btn i { font-size: 1.1em; }
 
-.secondary {
-    background: #6c757d;
-}
+.secondary { background: #6c757d; }
 
 .duty-name {
     font-size: 1.2rem;
@@ -351,6 +409,7 @@ td.cell-О select {
     border-bottom: 2px solid var(--border);
     display: inline-block;
     padding: 0 10px;
+    animation: fadeIn 0.3s ease;
 }
 
 .authors-info {
@@ -358,17 +417,18 @@ td.cell-О select {
     padding-top: 10px;
     border-top: 1px solid var(--border);
 }
-
 .authors-info h4 {
     margin: 0;
     font-size: 0.8rem;
     opacity: 0.6;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
-
 .authors-info p {
     margin: 5px 0 10px;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--accent);
 }
 
@@ -378,7 +438,6 @@ td.cell-О select {
     gap: 8px;
     margin-bottom: 15px;
 }
-
 .soc-btn {
     text-decoration: none;
     color: white;
@@ -387,24 +446,12 @@ td.cell-О select {
     font-size: 0.85rem;
     font-weight: bold;
     text-align: center;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
-
-.tg {
-    background: #0088cc;
-}
-
-.ds {
-    background: #5865F2;
-}
-
-.gh {
-    background: #333;
-}
-
-#attendance-screen.active~.dockbar #btn-duty-open {
-    display: flex !important;
-}
-
-.dock-side .clean-btn.visible {
-    display: flex !important;
-}
+.soc-btn:active { transform: scale(0.97); opacity: 0.9; }
+.tg { background: #0088cc; }
+.gh { background: #333; }

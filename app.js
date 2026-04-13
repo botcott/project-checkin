@@ -3,17 +3,16 @@ let currentGroupId = null;
 let currentMonthKey = new Date().toISOString().slice(0, 7); // Формат "2026-02"
 let deferredPrompt;
 
-// 1. РЕГИСТРАЦИЯ SERVICE WORKER (Обязательно для PWA)
+// 1. РЕГИСТРАЦИЯ SERVICE WORKER
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(err => console.log("SW error:", err));
 }
 
-// 2. ЛОГИКА ПРЕДЛОЖЕНИЯ УСТАНОВКИ (Срабатывает при каждом входе)
+// 2. ЛОГИКА ПРЕДЛОЖЕНИЯ УСТАНОВКИ
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
 
-    // Показываем кнопку установки в настройках, если открыто в браузере
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const installBtn = document.getElementById('btn-install-app');
     if (!isStandalone && installBtn) {
@@ -68,7 +67,7 @@ function render() {
         Object.keys(groups).forEach(id => {
             const wrap = document.createElement('div');
             wrap.className = 'group-card-wrapper';
-            wrap.innerHTML = `<div class="group-card" data-id="${id}">${id}</div><button class="btn-del" data-del-group="${id}">×</button>`;
+            wrap.innerHTML = `<div class="group-card" data-id="${id}">${id}</div><button class="btn-del" data-del-group="${id}"><i class="fas fa-times"></i></button>`;
             list.appendChild(wrap);
         });
     } else {
@@ -102,13 +101,13 @@ function render() {
                         <option value="Н" ${val === 'Н' ? 'selected' : ''}>Н</option>
                     </select></td>`;
             }).join('');
-            tr.innerHTML = `<td class="sticky-col"><button class="btn-del-row" data-del-row="${idx}">×</button><span contenteditable="true" class="edit-name" data-idx="${idx}" data-placeholder="Введите ФИО...">${row.name}</span></td>${cells}`;
+            tr.innerHTML = `<td class="sticky-col"><button class="btn-del-row" data-del-row="${idx}"><i class="fas fa-times"></i></button><span contenteditable="true" class="edit-name" data-idx="${idx}" data-placeholder="Введите ФИО...">${row.name}</span></td>${cells}`;
             body.appendChild(tr);
         });
     }
 }
 
-// 6. ГЛОБАЛЬНЫЙ ПРИОРИТЕТ ДЕЖУРНЫХ (Включая старые долги)
+// 6. ГЛОБАЛЬНЫЙ ПРИОРИТЕТ ДЕЖУРНЫХ
 function updateDuty() {
     const qty = parseInt(document.getElementById('duty-qty').value) || 2;
     let priority = [];
@@ -117,7 +116,6 @@ function updateDuty() {
     const currentMonthData = groups[currentGroupId][currentMonthKey] || [];
     const studentNames = currentMonthData.map(s => s.name).filter(n => n.trim() !== "");
 
-    // Сканируем все месяцы группы на наличие неотработанных опозданий
     Object.keys(groups[currentGroupId]).forEach(mKey => {
         groups[currentGroupId][mKey].forEach(student => {
             student.data.forEach(cell => {
@@ -135,18 +133,17 @@ function updateDuty() {
     const sortedOthers = [...others.slice(rotation), ...others.slice(0, rotation)];
     const finalDuty = [...priority, ...sortedOthers].slice(0, qty);
 
-    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n => `<div class="duty-name">${n}</div>`).join('');
+    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n => `<div class="duty-name"><i class="fas fa-user-check"></i> ${n}</div>`).join('');
 }
 
 // 7. Обработка кликов
 document.addEventListener('click', async (e) => {
-    const t = e.target;
+    const t = e.target.closest('button') || e.target; // Улучшенный поиск клика по иконке внутри кнопки
 
     if (t.classList.contains('group-card')) { currentGroupId = t.dataset.id; render(); }
     if (t.dataset.delGroup) { if (confirm("Удалить группу и ВСЮ историю?")) { delete groups[t.dataset.delGroup]; save(); render(); } }
     if (t.dataset.delRow !== undefined) { if (confirm("Удалить строку?")) { groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1); save(); render(); } }
 
-    // Переключатель отработки (Крестик / Галочка)
     if (t.classList.contains('duty-status-mark')) {
         const r = t.dataset.row, d = t.dataset.day;
         const current = groups[currentGroupId][currentMonthKey][r].data[d];
@@ -171,12 +168,13 @@ document.addEventListener('click', async (e) => {
     if (t.id === 'btn-close-settings' || t.id === 'settings-modal') document.getElementById('settings-modal').classList.add('hidden');
     if (t.id === 'btn-refresh-duty') updateDuty();
 
-    if (t.id === 'btn-theme-toggle') {
-        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', theme); localStorage.setItem('theme', theme);
+    if (t.id === 'btn-theme-toggle' || t.closest('#btn-theme-toggle')) {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
     }
 
-    // Установка приложения
     if (t.id === 'btn-install-app' && deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -226,6 +224,7 @@ document.getElementById('import-file').onchange = (e) => {
 function save() { localStorage.setItem('attendance_archive_v1', JSON.stringify(groups)); }
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.body.setAttribute('data-theme', localStorage.getItem('theme') || 'light');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.body.setAttribute('data-theme', savedTheme);
     render();
 });
