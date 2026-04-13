@@ -30,8 +30,7 @@ function showCustomPrompt(title, placeholder = '', defaultValue = '', validator 
         promptError.textContent = '';
         promptModal.classList.remove('hidden');
         promptInput.focus();
-        
-        // Сохраняем валидатор
+
         promptInput.dataset.validator = validator ? true : false;
         promptInput.validator = validator;
     });
@@ -76,7 +75,7 @@ function closeConfirm(value) {
 promptConfirm.addEventListener('click', () => {
     const value = promptInput.value.trim();
     const validator = promptInput.validator;
-    
+
     if (validator && !validator(value)) {
         promptError.textContent = 'Некорректное значение!';
         promptInput.focus();
@@ -148,7 +147,11 @@ function renderTableHeaders() {
     for (let i = 1; i <= daysCount; i++) {
         const th = document.createElement('th');
         th.textContent = i < 10 ? '0' + i : i;
-        if (isThisMonth && i === today.getDate()) th.className = 'today-mark';
+
+        if (isThisMonth && i === today.getDate()) {
+            th.className = 'today-mark';
+        }
+
         headerRow.appendChild(th);
     }
 }
@@ -160,11 +163,11 @@ function render() {
     const dutyBtn = document.getElementById('btn-duty-open');
 
     if (currentGroupId === null) {
-        gScreen.classList.add('active'); 
-        aScreen.classList.remove('active'); 
+        gScreen.classList.add('active');
+        aScreen.classList.remove('active');
         aScreen.classList.add('hidden');
         if (dutyBtn) dutyBtn.style.display = 'none';
-        
+
         const list = document.getElementById('group-list');
         list.innerHTML = '';
         Object.keys(groups).forEach(id => {
@@ -174,34 +177,56 @@ function render() {
             list.appendChild(wrap);
         });
     } else {
-        gScreen.classList.remove('active'); 
-        aScreen.classList.remove('hidden'); 
+        gScreen.classList.remove('active');
+        aScreen.classList.remove('hidden');
         aScreen.classList.add('active');
         if (dutyBtn) dutyBtn.style.display = 'flex';
-        
+
         document.getElementById('current-group-title').textContent = currentGroupId;
-        initMonthPicker(); 
+        initMonthPicker();
         renderTableHeaders();
 
+        // Автоматический перенос студентов из прошлых месяцев
         if (!groups[currentGroupId][currentMonthKey]) {
             const monthKeys = Object.keys(groups[currentGroupId]).sort();
-            const lastMonthKey = monthKeys[monthKeys.length - 1];
-            const prevMonthData = lastMonthKey ? groups[currentGroupId][lastMonthKey] : [];
             const [y, m] = currentMonthKey.split('-').map(Number);
-            groups[currentGroupId][currentMonthKey] = prevMonthData.map(row => ({ 
-                name: row.name, 
-                data: Array(new Date(y, m, 0).getDate()).fill("") 
-            }));
+
+            // Собираем ВСЕХ уникальных студентов из всех существующих месяцев
+            const allStudents = new Map();
+
+            monthKeys.forEach(monthKey => {
+                groups[currentGroupId][monthKey].forEach(student => {
+                    if (student.name && student.name.trim() !== '') {
+                        allStudents.set(student.name, student.name);
+                    }
+                });
+            });
+
+            // Если есть студенты в прошлых месяцах - переносим их
+            if (allStudents.size > 0) {
+                const studentNames = Array.from(allStudents.keys()).sort();
+                groups[currentGroupId][currentMonthKey] = studentNames.map(name => ({
+                    name: name,
+                    data: Array(new Date(y, m, 0).getDate()).fill("")
+                }));
+            } else {
+                // Если студентов вообще нет - создаём пустой массив
+                groups[currentGroupId][currentMonthKey] = [];
+            }
+
             save();
         }
 
-        const body = document.getElementById('table-body'); 
+        const body = document.getElementById('table-body');
         body.innerHTML = '';
+
         groups[currentGroupId][currentMonthKey].forEach((row, idx) => {
             const tr = document.createElement('tr');
+
             let cells = row.data.map((valObj, d) => {
                 const val = typeof valObj === 'object' ? valObj.status : valObj;
                 const solved = typeof valObj === 'object' ? valObj.solved : false;
+
                 return `<td class="cell-${val}">
                     ${val === 'О' ? `<div class="duty-status-mark ${solved ? 'mark-solved' : 'mark-unsolved'}" data-row="${idx}" data-day="${d}">${solved ? '✓' : '×'}</div>` : ''}
                     <select class="status-select" data-row="${idx}" data-day="${d}">
@@ -209,8 +234,10 @@ function render() {
                         <option value="Б" ${val === 'Б' ? 'selected' : ''}>Б</option>
                         <option value="О" ${val === 'О' ? 'selected' : ''}>О</option>
                         <option value="Н" ${val === 'Н' ? 'selected' : ''}>Н</option>
-                    </select></td>`;
+                    </select>
+                </td>`;
             }).join('');
+
             tr.innerHTML = `<td class="sticky-col"><button class="btn-del-row" data-del-row="${idx}"><i class="fas fa-times"></i></button><span contenteditable="true" class="edit-name" data-idx="${idx}" data-placeholder="Введите ФИО...">${row.name}</span></td>${cells}`;
             body.appendChild(tr);
         });
@@ -243,7 +270,7 @@ function updateDuty() {
     const sortedOthers = [...others.slice(rotation), ...others.slice(0, rotation)];
     const finalDuty = [...priority, ...sortedOthers].slice(0, qty);
 
-    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n => 
+    document.getElementById('duty-list-display').innerHTML = finalDuty.map(n =>
         `<div class="duty-name"><i class="fas fa-user-check"></i> ${n}</div>`
     ).join('');
 }
@@ -253,45 +280,49 @@ document.addEventListener('click', async (e) => {
     const t = e.target.closest('button') || e.target;
 
     // Открытие группы
-    if (t.classList.contains('group-card')) { 
-        currentGroupId = t.dataset.id; 
-        render(); 
+    if (t.classList.contains('group-card')) {
+        currentGroupId = t.dataset.id;
+        render();
     }
-    
+
     // Удаление группы
-    if (t.dataset.delGroup) { 
+    if (t.dataset.delGroup) {
         const confirmed = await showCustomConfirm(
-            'Удаление группы', 
+            'Удаление группы',
             `Вы точно хотите удалить группу "${t.dataset.delGroup}" и ВСЮ её историю?`,
             true
         );
         if (confirmed) {
-            delete groups[t.dataset.delGroup]; 
-            save(); 
-            render(); 
+            delete groups[t.dataset.delGroup];
+            save();
+            render();
         }
     }
-    
+
     // Удаление строки
-    if (t.dataset.delRow !== undefined) { 
+    if (t.dataset.delRow !== undefined) {
         const confirmed = await showCustomConfirm(
-            'Удаление студента', 
+            'Удаление студента',
             'Удалить этого студента из текущего месяца?',
             true
         );
         if (confirmed) {
-            groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1); 
-            save(); 
-            render(); 
+            groups[currentGroupId][currentMonthKey].splice(t.dataset.delRow, 1);
+            save();
+            render();
         }
     }
 
     // Переключение отработки
     if (t.classList.contains('duty-status-mark')) {
-        const r = t.dataset.row, d = t.dataset.day;
+        const r = t.dataset.row;
+        const d = t.dataset.day;
         const current = groups[currentGroupId][currentMonthKey][r].data[d];
-        if (typeof current === 'object') current.solved = !current.solved;
-        save(); 
+
+        if (typeof current === 'object') {
+            current.solved = !current.solved;
+        }
+        save();
         render();
     }
 
@@ -299,49 +330,57 @@ document.addEventListener('click', async (e) => {
     if (t.id === 'btn-main-add') {
         if (!currentGroupId) {
             const groupName = await showCustomPrompt(
-                'Новая группа', 
-                'Например: Б20-301', 
+                'Новая группа',
+                'Например: Б20-301',
                 '',
                 (val) => val.length > 0 && !groups[val]
             );
-            
+
             if (groupName) {
-                if (groups[groupName]) {
-                    promptError.textContent = 'Такая группа уже существует!';
-                } else {
-                    groups[groupName] = {}; 
-                    save(); 
+                if (!groups[groupName]) {
+                    groups[groupName] = {};
+                    save();
                     render();
                 }
             }
         } else {
             const [y, m] = currentMonthKey.split('-').map(Number);
-            groups[currentGroupId][currentMonthKey].push({ 
-                name: "", 
-                data: Array(new Date(y, m, 0).getDate()).fill("") 
+            groups[currentGroupId][currentMonthKey].push({
+                name: "",
+                data: Array(new Date(y, m, 0).getDate()).fill("")
             });
-            save(); 
+            save();
             render();
         }
     }
 
-    if (t.id === 'btn-back') { currentGroupId = null; render(); }
-    if (t.id === 'btn-duty-open') { 
-        if (currentGroupId) { 
-            updateDuty(); 
-            document.getElementById('duty-modal').classList.remove('hidden'); 
-        } 
+    if (t.id === 'btn-back') {
+        currentGroupId = null;
+        render();
     }
+
+    if (t.id === 'btn-duty-open') {
+        if (currentGroupId) {
+            updateDuty();
+            document.getElementById('duty-modal').classList.remove('hidden');
+        }
+    }
+
     if (t.id === 'btn-close-duty' || t.id === 'duty-modal') {
         document.getElementById('duty-modal').classList.add('hidden');
     }
+
     if (t.id === 'btn-open-settings') {
         document.getElementById('settings-modal').classList.remove('hidden');
     }
+
     if (t.id === 'btn-close-settings' || t.id === 'settings-modal') {
         document.getElementById('settings-modal').classList.add('hidden');
     }
-    if (t.id === 'btn-refresh-duty') updateDuty();
+
+    if (t.id === 'btn-refresh-duty') {
+        updateDuty();
+    }
 
     // Переключение темы
     if (t.id === 'btn-theme-toggle' || t.closest('#btn-theme-toggle')) {
@@ -362,16 +401,20 @@ document.addEventListener('click', async (e) => {
 
 // ========== ОБРАБОТКА ИЗМЕНЕНИЙ ==========
 document.addEventListener('change', (e) => {
-    if (e.target.id === 'month-select') { 
-        currentMonthKey = e.target.value; 
-        render(); 
+    if (e.target.id === 'month-select') {
+        currentMonthKey = e.target.value;
+        render();
     }
+
     if (e.target.classList.contains('status-select')) {
         const s = e.target;
+        const row = s.dataset.row;
+        const day = s.dataset.day;
         const val = s.value;
-        groups[currentGroupId][currentMonthKey][s.dataset.row].data[s.dataset.day] = 
+
+        groups[currentGroupId][currentMonthKey][row].data[day] =
             (val === 'О') ? { status: 'О', solved: false } : val;
-        save(); 
+        save();
         render();
     }
 });
@@ -380,17 +423,19 @@ document.addEventListener('change', (e) => {
 document.addEventListener('focusout', (e) => {
     if (e.target.classList.contains('edit-name')) {
         const idx = e.target.getAttribute('data-idx');
-        groups[currentGroupId][currentMonthKey][idx].name = e.target.textContent; 
-        save();
+        if (groups[currentGroupId] && groups[currentGroupId][currentMonthKey]) {
+            groups[currentGroupId][currentMonthKey][idx].name = e.target.textContent;
+            save();
+        }
     }
 });
 
 // ========== ЭКСПОРТ/ИМПОРТ ==========
 document.getElementById('btn-export').onclick = () => {
     const blob = new Blob([JSON.stringify(groups, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a'); 
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `academ_backup_${currentMonthKey}.json`; 
+    a.download = `academ_backup_${currentMonthKey}.json`;
     a.click();
 };
 
@@ -402,7 +447,7 @@ document.getElementById('import-file').onchange = async (e) => {
         'Это заменит все текущие данные. Продолжить?',
         true
     );
-    
+
     if (confirmed) {
         const reader = new FileReader();
         reader.onload = (ev) => {
@@ -410,8 +455,8 @@ document.getElementById('import-file').onchange = async (e) => {
                 groups = JSON.parse(ev.target.result);
                 save();
                 location.reload();
-            } catch (err) { 
-                alert("Ошибка: Неверный формат файла"); 
+            } catch (err) {
+                alert("Ошибка: Неверный формат файла");
             }
         };
         reader.readAsText(e.target.files[0]);
@@ -420,8 +465,8 @@ document.getElementById('import-file').onchange = async (e) => {
     }
 };
 
-function save() { 
-    localStorage.setItem('attendance_archive_v1', JSON.stringify(groups)); 
+function save() {
+    localStorage.setItem('attendance_archive_v1', JSON.stringify(groups));
 }
 
 // ========== ЗАПУСК ==========

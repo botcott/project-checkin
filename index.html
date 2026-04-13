@@ -59,14 +59,17 @@
     <div id="settings-modal" class="modal hidden">
         <div class="modal-card">
             <h3><i class="fas fa-sliders-h" style="margin-right: 8px;"></i>Настройки</h3>
-            <button id="btn-theme-toggle" class="ui-btn full-width"><i class="fas fa-moon"></i> Тема <i class="fas fa-sun"></i></button>
+            <button id="btn-theme-toggle" class="ui-btn full-width"><i class="fas fa-moon"></i> Тема <i
+                    class="fas fa-sun"></i></button>
 
             <div style="margin: 15px 0; padding-top: 10px; border-top: 1px solid var(--border);">
-                <button id="btn-install-app" class="ui-btn full-width hidden"
-                    style="background:#ffc107; color:#333;"><i class="fas fa-download"></i> Установить приложение</button>
+                <button id="btn-install-app" class="ui-btn full-width hidden" style="background:#ffc107; color:#333;"><i
+                        class="fas fa-download"></i> Установить приложение</button>
                 <h4 style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 8px; text-transform: uppercase;">Данные</h4>
-                <button id="btn-export" class="ui-btn full-width" style="background:#28a745;"><i class="fas fa-file-export"></i> Экспорт</button>
-                <button id="btn-import" class="ui-btn full-width" style="background:#17a2b8;"><i class="fas fa-file-import"></i> Импорт</button>
+                <button id="btn-export" class="ui-btn full-width" style="background:#28a745;"><i
+                        class="fas fa-file-export"></i> Экспорт</button>
+                <button id="btn-import" class="ui-btn full-width" style="background:#17a2b8;"><i
+                        class="fas fa-file-import"></i> Импорт</button>
                 <input type="file" id="import-file" style="display:none" accept=".json">
             </div>
 
@@ -79,11 +82,14 @@
 
             <div class="social-links">
                 <h4><i class="fas fa-share-alt"></i> Соц-сети:</h4>
-                <a href="https://t.me/thisnicknamewastaken" target="_blank" class="soc-btn tg"><i class="fab fa-telegram-plane"></i> Telegram</a>
-                <a href="https://github.com/botcott" target="_blank" class="soc-btn gh"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://t.me/thisnicknamewastaken" target="_blank" class="soc-btn tg"><i
+                        class="fab fa-telegram-plane"></i> Telegram</a>
+                <a href="https://github.com/botcott" target="_blank" class="soc-btn gh"><i class="fab fa-github"></i>
+                    GitHub</a>
             </div>
 
-            <button id="btn-close-settings" class="ui-btn full-width secondary"><i class="fas fa-times"></i> Закрыть</button>
+            <button id="btn-close-settings" class="ui-btn full-width secondary"><i class="fas fa-times"></i>
+                Закрыть</button>
         </div>
     </div>
 
@@ -93,12 +99,14 @@
             <h3><i class="fas fa-users"></i> Дежурные</h3>
             <div id="duty-list-display" style="margin: 20px 0; min-height: 50px;"></div>
             <div style="margin-bottom: 20px;">
-                <label style="font-size: 0.8rem; opacity: 0.7;"><i class="fas fa-sort-amount-up"></i> Количество:</label>
+                <label style="font-size: 0.8rem; opacity: 0.7;"><i class="fas fa-sort-amount-up"></i>
+                    Количество:</label>
                 <input type="number" id="duty-qty" value="2" min="1" max="10"
                     style="width: 50px; padding: 5px; text-align: center; border-radius: 5px; border: 1px solid var(--border);">
             </div>
             <button id="btn-refresh-duty" class="ui-btn full-width"><i class="fas fa-sync-alt"></i> Обновить</button>
-            <button id="btn-close-duty" class="ui-btn full-width secondary"><i class="fas fa-times"></i> Закрыть</button>
+            <button id="btn-close-duty" class="ui-btn full-width secondary"><i class="fas fa-times"></i>
+                Закрыть</button>
         </div>
     </div>
 
@@ -106,11 +114,14 @@
     <div id="custom-prompt-modal" class="modal hidden">
         <div class="modal-card" style="max-width: 300px;">
             <h3 id="prompt-title"><i class="fas fa-pencil-alt"></i> Ввод</h3>
-            <input type="text" id="prompt-input" class="prompt-input-field" placeholder="Введите значение..." autocomplete="off">
+            <input type="text" id="prompt-input" class="prompt-input-field" placeholder="Введите значение..."
+                autocomplete="off">
             <div class="prompt-error" id="prompt-error"></div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button id="prompt-confirm" class="ui-btn" style="flex: 1; margin: 0;"><i class="fas fa-check"></i> ОК</button>
-                <button id="prompt-cancel" class="ui-btn secondary" style="flex: 1; margin: 0;"><i class="fas fa-times"></i> Отмена</button>
+                <button id="prompt-confirm" class="ui-btn" style="flex: 1; margin: 0;"><i class="fas fa-check"></i>
+                    ОК</button>
+                <button id="prompt-cancel" class="ui-btn secondary" style="flex: 1; margin: 0;"><i
+                        class="fas fa-times"></i> Отмена</button>
             </div>
         </div>
     </div>
@@ -121,8 +132,10 @@
             <h3 id="confirm-title"><i class="fas fa-question-circle"></i> Подтверждение</h3>
             <p id="confirm-message" style="margin: 15px 0; word-break: break-word;">Вы уверены?</p>
             <div style="display: flex; gap: 10px;">
-                <button id="confirm-yes" class="ui-btn" style="flex: 1; margin: 0; background: var(--n-color);"><i class="fas fa-check"></i> Да</button>
-                <button id="confirm-no" class="ui-btn secondary" style="flex: 1; margin: 0;"><i class="fas fa-times"></i> Нет</button>
+                <button id="confirm-yes" class="ui-btn" style="flex: 1; margin: 0; background: var(--n-color);"><i
+                        class="fas fa-check"></i> Да</button>
+                <button id="confirm-no" class="ui-btn secondary" style="flex: 1; margin: 0;"><i
+                        class="fas fa-times"></i> Нет</button>
             </div>
         </div>
     </div>
