@@ -657,3 +657,18 @@ td.cell-Н .status-select {
 .prompt-error:not(:empty) {
     animation: fadeIn 0.2s ease;
 }
+
+#btn-force-update:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.update-success {
+  background: #28a745;
+  color: white;
+}
+
+.update-error {
+  background: #dc3545;
+  color: white;
+}
