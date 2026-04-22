@@ -29,39 +29,39 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-self.addEventListener('fetch', (e) => {
-  // Кэшируем только GET‑запросы
-  if (e.request.method !== 'GET') {
-    return;
-  }
+// self.addEventListener('fetch', (e) => {
+//   // Кэшируем только GET‑запросы
+//   if (e.request.method !== 'GET') {
+//     return;
+//   }
 
-  e.respondWith(
-    caches.match(e.request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
+//   e.respondWith(
+//     caches.match(e.request)
+//       .then(cachedResponse => {
+//         if (cachedResponse) {
+//           return cachedResponse;
+//         }
 
-        return fetch(e.request)
-          .then(response => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
+//         return fetch(e.request)
+//           .then(response => {
+//             if (!response || response.status !== 200 || response.type !== 'basic') {
+//               return response;
+//             }
 
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(e.request, responseToCache);
-              });
+//             const responseToCache = response.clone();
+//             caches.open(CACHE_NAME)
+//               .then(cache => {
+//                 cache.put(e.request, responseToCache);
+//               });
 
-            return response;
-          })
-          .catch(() => {
-            return caches.match('/offline.html');
-          });
-      })
-  );
-});
+//             return response;
+//           })
+//           .catch(() => {
+//             return caches.match('/offline.html');
+//           });
+//       })
+//   );
+// });
 
 self.addEventListener('message', (event) => {
   if (event.data.type === 'SKIP_WAITING') {
