@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attendance-app-v1';
+const CACHE_NAME = 'attendance-app-v2';
 const STATIC_FILES = [
   'index.html',
   'app.js',
