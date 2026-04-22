@@ -122,9 +122,19 @@ window.addEventListener('beforeinstallprompt', (e) => {
 // ========== ИНИЦИАЛИЗАЦИЯ МЕСЯЦА ==========
 function initMonthPicker() {
     const select = document.getElementById('month-select');
+    const savedMode = localStorage.getItem('data-mode') || 'default';
+
+    let monthsCheck;
+
     if (!select) return;
     select.innerHTML = '';
-    for (let i = 0; i > -12; i--) {
+
+    if (savedMode == "bogdan")
+        monthsCheck = -15600;
+    else
+        monthsCheck = -12;
+
+    for (let i = 0; i > monthsCheck; i--) {
         const d = new Date();
         d.setMonth(d.getMonth() + i);
         const val = d.toISOString().slice(0, 7);
@@ -391,14 +401,66 @@ document.addEventListener('click', async (e) => {
     if (t.id === 'btn-refresh-duty') {
         updateDuty();
     }
-
     // Переключение темы
     if (t.id === 'btn-theme-toggle' || t.closest('#btn-theme-toggle')) {
-        const currentTheme = document.body.getAttribute('data-theme');
+        const currentTheme = document.body.getAttribute('data-theme') || 'light';
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
         document.body.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
+
+        const icon = document.querySelector('#btn-theme-toggle i');
+
+        // Меняем иконку в зависимости от новой темы
+        if (newTheme === 'dark') {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        } else {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
     }
+
+    // Переключение режима Богдана
+    if (t.id === 'btn-bogdan-mode-toggle' || t.closest('#btn-bogdan-mode-toggle')) {
+        const savedMode = localStorage.getItem('data-mode') || 'default';
+        const icon = document.querySelector('#btn-bogdan-mode-toggle i');
+
+        let toggleMessage;
+
+        if (savedMode === "bogdan") {
+            toggleMessage = "выключить";
+        } else {
+            toggleMessage = "включить";
+        }
+
+        const confirmed = await showCustomConfirm(
+            'Режим Богдана',
+            `Вы точно хотите ${toggleMessage} режим Богдана?`,
+            true
+        );
+
+        if (confirmed) {
+            let newMode;
+
+            if (savedMode === "default") {
+                newMode = "bogdan";
+                icon.classList.remove('fa-toggle-off');
+                icon.classList.add('fa-toggle-on');
+            } else {
+                newMode = "default";
+                icon.classList.remove('fa-toggle-on');
+                icon.classList.add('fa-toggle-off');
+            }
+
+            document.body.setAttribute('data-mode', newMode);
+            localStorage.setItem('data-mode', newMode);
+
+            initMonthPicker();
+            render();
+        }
+    }
+
 
     // Установка PWA
     if (t.id === 'btn-install-app' && deferredPrompt) {
@@ -476,16 +538,16 @@ document.getElementById('import-file').onchange = async (e) => {
 };
 
 function syncData() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.sync.register('sync-attendance-data');
-    });
-  }
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.sync.register('sync-attendance-data');
+        });
+    }
 }
 
 function save() {
-  localStorage.setItem('attendance_archive_v1', JSON.stringify(groups));
-  syncData();
+    localStorage.setItem('attendance_archive_v1', JSON.stringify(groups));
+    syncData();
 }
 
 
@@ -497,55 +559,55 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.getElementById('btn-force-update').addEventListener('click', async () => {
-  const button = document.getElementById('btn-force-update');
-  const textSpan = document.getElementById('update-btn-text');
+    const button = document.getElementById('btn-force-update');
+    const textSpan = document.getElementById('update-btn-text');
 
-  // Блокируем кнопку и показываем загрузку
-  button.disabled = true;
-  textSpan.textContent = 'Проверка...';
-  button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${textSpan.outerHTML}`;
+    // Блокируем кнопку и показываем загрузку
+    button.disabled = true;
+    textSpan.textContent = 'Проверка...';
+    button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${textSpan.outerHTML}`;
 
-  try {
-    const registration = await navigator.serviceWorker.getRegistration();
-    if (registration) {
-      await registration.update();
+    try {
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+            await registration.update();
 
-      // Проверяем, есть ли новая версия в ожидании
-      if (registration.waiting) {
-        // Показываем диалог обновления
-        const confirmed = await showCustomConfirm(
-          'Обновление доступно',
-          'Новая версия приложения готова. Перезагрузить сейчас?',
-          false
-        );
-        if (confirmed) {
-          // Пропускаем ожидание и перезагружаем
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-          window.location.reload();
+            // Проверяем, есть ли новая версия в ожидании
+            if (registration.waiting) {
+                // Показываем диалог обновления
+                const confirmed = await showCustomConfirm(
+                    'Обновление доступно',
+                    'Новая версия приложения готова. Перезагрузить сейчас?',
+                    false
+                );
+                if (confirmed) {
+                    // Пропускаем ожидание и перезагружаем
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    window.location.reload();
+                } else {
+                    // Сбрасываем состояние кнопки
+                    button.disabled = false;
+                    textSpan.textContent = 'Проверить обновления';
+                    button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+                }
+            } else {
+                // Обновлений нет — информируем пользователя
+                alert('У вас уже последняя версия приложения!');
+                button.disabled = false;
+                textSpan.textContent = 'Проверить обновления';
+                button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+            }
         } else {
-          // Сбрасываем состояние кнопки
-          button.disabled = false;
-          textSpan.textContent = 'Проверить обновления';
-          button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+            alert('Сервис‑воркер не зарегистрирован');
+            button.disabled = false;
+            textSpan.textContent = 'Проверить обновления';
+            button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
         }
-      } else {
-        // Обновлений нет — информируем пользователя
-        alert('У вас уже последняя версия приложения!');
+    } catch (error) {
+        console.error('Ошибка обновления:', error);
+        alert('Не удалось проверить обновления. Проверьте подключение к сети.');
         button.disabled = false;
         textSpan.textContent = 'Проверить обновления';
         button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
-      }
-    } else {
-      alert('Сервис‑воркер не зарегистрирован');
-      button.disabled = false;
-      textSpan.textContent = 'Проверить обновления';
-      button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
     }
-  } catch (error) {
-    console.error('Ошибка обновления:', error);
-    alert('Не удалось проверить обновления. Проверьте подключение к сети.');
-    button.disabled = false;
-    textSpan.textContent = 'Проверить обновления';
-    button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
-  }
 });
