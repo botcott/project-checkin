@@ -485,3 +485,57 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.setAttribute('data-theme', savedTheme);
     render();
 });
+
+document.getElementById('btn-force-update').addEventListener('click', async () => {
+  const button = document.getElementById('btn-force-update');
+  const textSpan = document.getElementById('update-btn-text');
+
+  // Блокируем кнопку и показываем загрузку
+  button.disabled = true;
+  textSpan.textContent = 'Проверка...';
+  button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${textSpan.outerHTML}`;
+
+  try {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+      await registration.update();
+
+      // Проверяем, есть ли новая версия в ожидании
+      if (registration.waiting) {
+        // Показываем диалог обновления
+        const confirmed = await showCustomConfirm(
+          'Обновление доступно',
+          'Новая версия приложения готова. Перезагрузить сейчас?',
+          false
+        );
+        if (confirmed) {
+          // Пропускаем ожидание и перезагружаем
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          window.location.reload();
+        } else {
+          // Сбрасываем состояние кнопки
+          button.disabled = false;
+          textSpan.textContent = 'Проверить обновления';
+          button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+        }
+      } else {
+        // Обновлений нет — информируем пользователя
+        alert('У вас уже последняя версия приложения!');
+        button.disabled = false;
+        textSpan.textContent = 'Проверить обновления';
+        button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+      }
+    } else {
+      alert('Сервис‑воркер не зарегистрирован');
+      button.disabled = false;
+      textSpan.textContent = 'Проверить обновления';
+      button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+    }
+  } catch (error) {
+    console.error('Ошибка обновления:', error);
+    alert('Не удалось проверить обновления. Проверьте подключение к сети.');
+    button.disabled = false;
+    textSpan.textContent = 'Проверить обновления';
+    button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+  }
+});
