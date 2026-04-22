@@ -161,11 +161,13 @@ function render() {
     const gScreen = document.getElementById('group-screen');
     const aScreen = document.getElementById('attendance-screen');
     const dutyBtn = document.getElementById('btn-duty-open');
+    const helpBtn = document.getElementById('btn-help-open');
 
     if (currentGroupId === null) {
         gScreen.classList.add('active');
         aScreen.classList.remove('active');
         aScreen.classList.add('hidden');
+        if (dutyBtn) dutyBtn.style.display = 'none';
         if (dutyBtn) dutyBtn.style.display = 'none';
 
         const list = document.getElementById('group-list');
@@ -180,6 +182,7 @@ function render() {
         gScreen.classList.remove('active');
         aScreen.classList.remove('hidden');
         aScreen.classList.add('active');
+        if (helpBtn) helpBtn.style.display = 'none';
         if (dutyBtn) dutyBtn.style.display = 'flex';
 
         document.getElementById('current-group-title').textContent = currentGroupId;
@@ -363,6 +366,13 @@ document.addEventListener('click', async (e) => {
         if (currentGroupId) {
             updateDuty();
             document.getElementById('duty-modal').classList.remove('hidden');
+        }
+    }
+
+    if (t.id === 'btn-help-open') {
+        if (currentGroupId) {
+            updateDuty();
+            document.getElementById('help-modal').classList.remove('hidden');
         }
     }
 
