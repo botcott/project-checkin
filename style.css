@@ -3,7 +3,7 @@
     --card: #ffffff;
     --text: #1c1e21;
     --border: #e4e6eb;
-    --accent: #007bff;
+    --accent: #3868af;
     --accent-dark: #005dc2;
     --b-color: #2ecc71;
     --o-color: #f1c40f;
@@ -578,7 +578,7 @@ td.cell-Н .status-select {
     margin: 5px 0 10px;
     font-weight: bold;
     font-size: 0.9rem;
-    color: var(--accent);
+    color: var(--text);
 }
 
 /* --- СОЦСЕТИ --- */
@@ -609,13 +609,9 @@ td.cell-Н .status-select {
     opacity: 0.9;
 }
 
-.tg {
-    background: #0088cc;
-}
-
-.gh {
-    background: #333;
-}
+.tg { background: #0088cc; }
+.gh { background: #333; }
+.don { background: #e7bd33; }
 
 /* --- КАСТОМНЫЕ ДИАЛОГИ --- */
 .prompt-input-field {
