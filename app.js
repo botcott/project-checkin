@@ -12,6 +12,9 @@ const promptConfirm = document.getElementById('prompt-confirm');
 const promptCancel = document.getElementById('prompt-cancel');
 
 const confirmModal = document.getElementById('custom-confirm-modal');
+const alertModal = document.getElementById('custom-alert-modal');
+const alertTitle = document.getElementById('alert-title');
+const alertYes = document.getElementById('alert-yes');
 const confirmTitle = document.getElementById('confirm-title');
 const confirmMessage = document.getElementById('confirm-message');
 const confirmYes = document.getElementById('confirm-yes');
@@ -48,6 +51,15 @@ function showCustomConfirm(title, message, isDanger = false) {
             confirmYes.style.background = 'var(--accent)';
         }
         confirmModal.classList.remove('hidden');
+    });
+}
+
+// Функция показа кастомного confirm
+function showCustomAlert(title, message, isDanger = false) {
+    return new Promise((resolve) => {
+        currentConfirmResolver = resolve;
+        alertTitle.innerHTML = `<i class="fas fa-${isDanger ? 'exclamation-triangle' : 'question-circle'}"></i> ${title}`;
+        alertModal.classList.remove('hidden');
     });
 }
 
@@ -421,45 +433,69 @@ document.addEventListener('click', async (e) => {
         }
     }
 
-    // Переключение режима Богдана
-    if (t.id === 'btn-bogdan-mode-toggle' || t.closest('#btn-bogdan-mode-toggle')) {
-        const savedMode = localStorage.getItem('data-mode') || 'default';
-        const icon = document.querySelector('#btn-bogdan-mode-toggle i');
+    // Обработчик для кнопки режима Богдана
+    document.getElementById('btn-bogdan-mode-toggle').addEventListener('click', async function (e) {
+        try {
+            const savedMode = localStorage.getItem('data-mode') || 'default';
+            const icon = this.querySelector('i');
+            const screens = document.querySelectorAll('.screen');
 
-        let toggleMessage;
-
-        if (savedMode === "bogdan") {
-            toggleMessage = "выключить";
-        } else {
-            toggleMessage = "включить";
-        }
-
-        const confirmed = await showCustomConfirm(
-            'Режим Богдана',
-            `Вы точно хотите ${toggleMessage} режим Богдана?`,
-            true
-        );
-
-        if (confirmed) {
-            let newMode;
-
-            if (savedMode === "default") {
-                newMode = "bogdan";
-                icon.classList.remove('fa-toggle-off');
-                icon.classList.add('fa-toggle-on');
-            } else {
-                newMode = "default";
-                icon.classList.remove('fa-toggle-on');
-                icon.classList.add('fa-toggle-off');
+            if (!icon) {
+                console.error('Иконка не найдена в кнопке');
+                return;
+            }
+            if (screens.length === 0) {
+                console.warn('Элементы .screen не найдены в DOM');
+                return;
             }
 
-            document.body.setAttribute('data-mode', newMode);
-            localStorage.setItem('data-mode', newMode);
+            const toggleMessage = savedMode === 'bogdan' ? 'выключить' : 'включить';
 
-            initMonthPicker();
-            render();
+            const confirmed = await showCustomConfirm(
+                'Режим Богдана',
+                `Вы точно хотите ${toggleMessage} режим Богдана?`,
+                true
+            );
+
+            if (confirmed) {
+                let newMode;
+
+                if (savedMode === 'default') {
+                    newMode = 'bogdan';
+                    screens.forEach(screen => {
+                        screen.style.backgroundImage = "url('https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif')";
+                        screen.style.backgroundSize = 'cover';
+                        screen.style.backgroundRepeat = 'no-repeat';
+                        screen.style.backgroundPosition = 'center center';
+                        screen.style.height = '100vh';
+                        screen.style.margin = '0';
+                    });
+                    icon.classList.remove('fa-toggle-off');
+                    icon.classList.add('fa-toggle-on');
+                } else {
+                    newMode = 'default';
+                    screens.forEach(screen => {
+                        screen.style.backgroundImage = '';
+                        screen.style.backgroundSize = '';
+                        screen.style.backgroundRepeat = '';
+                        screen.style.backgroundPosition = '';
+                        screen.style.height = '';
+                        screen.style.margin = '';
+                    });
+                    icon.classList.remove('fa-toggle-on');
+                    icon.classList.add('fa-toggle-off');
+                }
+
+                document.body.setAttribute('data-mode', newMode);
+                localStorage.setItem('data-mode', newMode);
+
+                initMonthPicker();
+                render();
+            }
+        } catch (error) {
+            console.error('Ошибка в обработчике кнопки режима Богдана:', error);
         }
-    }
+    });
 
 
     // Установка PWA
@@ -550,13 +586,34 @@ function save() {
     syncData();
 }
 
-
 // ========== ЗАПУСК ==========
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function () {
+    const savedMode = localStorage.getItem('data-mode') || 'default';
+    document.body.setAttribute('data-mode', savedMode);
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
-    render();
+
+    const screens = document.querySelectorAll('.screen');
+    const icon = document.querySelector('#btn-bogdan-mode-toggle i');
+
+    if (savedMode === 'bogdan') {
+        screens.forEach(screen => {
+            screen.style.backgroundImage = "url('https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif')";
+            screen.style.backgroundSize = 'cover';
+            screen.style.backgroundRepeat = 'no-repeat';
+            screen.style.backgroundPosition = 'center center';
+            screen.style.height = '100vh';
+            screen.style.margin = '0';
+        });
+        icon.classList.remove('fa-toggle-off');
+        icon.classList.add('fa-toggle-on');
+    } else {
+        icon.classList.remove('fa-toggle-on');
+        icon.classList.add('fa-toggle-off');
+    }
+    render()
 });
+
 
 document.getElementById('btn-force-update').addEventListener('click', async () => {
     const button = document.getElementById('btn-force-update');
@@ -591,11 +648,11 @@ document.getElementById('btn-force-update').addEventListener('click', async () =
                     button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
                 }
             } else {
-                // Обновлений нет — информируем пользователя
-                alert('У вас уже последняя версия приложения!');
-                button.disabled = false;
-                textSpan.textContent = 'Проверить обновления';
-                button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+                    // Обновлений нет — информируем пользователя
+                    alert('У Вас уже поледняя версия приложения')
+                    button.disabled = false;
+                    textSpan.textContent = 'Проверить обновления';
+                    button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
             }
         } else {
             alert('Сервис‑воркер не зарегистрирован');
