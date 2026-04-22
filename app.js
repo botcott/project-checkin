@@ -331,7 +331,7 @@ document.addEventListener('click', async (e) => {
         if (!currentGroupId) {
             const groupName = await showCustomPrompt(
                 'Новая группа',
-                'Например: Б20-301',
+                'Например: 25-03',
                 '',
                 (val) => val.length > 0 && !groups[val]
             );
@@ -465,9 +465,19 @@ document.getElementById('import-file').onchange = async (e) => {
     }
 };
 
-function save() {
-    localStorage.setItem('attendance_archive_v1', JSON.stringify(groups));
+function syncData() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.sync.register('sync-attendance-data');
+    });
+  }
 }
+
+function save() {
+  localStorage.setItem('attendance_archive_v1', JSON.stringify(groups));
+  syncData();
+}
+
 
 // ========== ЗАПУСК ==========
 document.addEventListener('DOMContentLoaded', () => {
