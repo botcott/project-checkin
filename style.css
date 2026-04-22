@@ -612,6 +612,8 @@ td.cell-Н .status-select {
 .tg { background: #0088cc; }
 .gh { background: #333; }
 .don { background: #e7bd33; }
+.export { background: #1e58af; }
+.import { background: #35b460; }
 
 /* --- КАСТОМНЫЕ ДИАЛОГИ --- */
 .prompt-input-field {
