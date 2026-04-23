@@ -570,8 +570,6 @@ td.cell-Н .status-select {
     margin: 0;
     font-size: 0.8rem;
     opacity: 0.6;
-    display: flex;
-    align-items: center;
     gap: 5px;
 }
 
@@ -610,11 +608,25 @@ td.cell-Н .status-select {
     opacity: 0.9;
 }
 
-.tg { background: #0088cc; }
-.gh { background: #333; }
-.don { background: #e7bd33; }
-.export { background: #1e58af; }
-.import { background: #35b460; }
+.tg {
+    background: #0088cc;
+}
+
+.gh {
+    background: #333;
+}
+
+.don {
+    background: #e7bd33;
+}
+
+.export {
+    background: #1e58af;
+}
+
+.import {
+    background: #35b460;
+}
 
 /* --- КАСТОМНЫЕ ДИАЛОГИ --- */
 .prompt-input-field {
@@ -658,16 +670,16 @@ td.cell-Н .status-select {
 }
 
 #btn-force-update:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .update-success {
-  background: #28a745;
-  color: white;
+    background: #28a745;
+    color: white;
 }
 
 .update-error {
-  background: #dc3545;
-  color: white;
+    background: #dc3545;
+    color: white;
 }
