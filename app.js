@@ -351,6 +351,54 @@ document.addEventListener('click', async (e) => {
         render();
     }
 
+    if (t.id === 'btn-bogdan-mode-gif-url') {
+        const screens = document.querySelectorAll('.screen');
+        const savedUrlBogdan = localStorage.getItem('url-bogdan') || 'https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif';
+        const urlBogdan = await showCustomPrompt(
+            'Установить ссылку на GIF в режиме Богдана',
+            savedUrlBogdan,
+            '',
+        );
+        if (urlBogdan) {
+            let newUrlBogdan;
+
+            if (urlBogdan !== 'https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif') {
+                newUrlBogdan = urlBogdan;
+                screens.forEach(screen => {
+                    screen.style.backgroundImage = `url('${urlBogdan}')`;
+                    screen.style.backgroundSize = 'cover';
+                    screen.style.backgroundRepeat = 'no-repeat';
+                    screen.style.backgroundPosition = 'center center';
+                    screen.style.height = '100vh';
+                    screen.style.margin = '0';
+                });
+            }
+            else {
+                screens.forEach(screen => {
+                    screen.style.backgroundImage = '';
+                    screen.style.backgroundSize = '';
+                    screen.style.backgroundRepeat = '';
+                    screen.style.backgroundPosition = '';
+                    screen.style.height = '';
+                    screen.style.margin = '';
+                });
+                newUrlBogdan = 'https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif';
+            }
+            document.body.setAttribute('url-bogdan', newUrlBogdan);
+            localStorage.setItem('url-bogdan', newUrlBogdan);
+
+
+            if (screens.length === 0) {
+                console.warn('Элементы .screen не найдены в DOM');
+                return;
+            }
+
+
+            save();
+            render();
+        }
+    }
+
     // Главная кнопка "+"
     if (t.id === 'btn-main-add') {
         if (!currentGroupId) {
@@ -459,11 +507,11 @@ document.addEventListener('click', async (e) => {
 
             if (confirmed) {
                 let newMode;
-
+                const savedUrlBogdan = localStorage.getItem('url-bogdan') || 'https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif';
                 if (savedMode === 'default') {
                     newMode = 'bogdan';
                     screens.forEach(screen => {
-                        screen.style.backgroundImage = "url('https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif')";
+                        screen.style.backgroundImage = `url('${savedUrlBogdan}')`;
                         screen.style.backgroundSize = 'cover';
                         screen.style.backgroundRepeat = 'no-repeat';
                         screen.style.backgroundPosition = 'center center';
@@ -590,6 +638,8 @@ function save() {
 document.addEventListener('DOMContentLoaded', function () {
     const savedMode = localStorage.getItem('data-mode') || 'default';
     document.body.setAttribute('data-mode', savedMode);
+    const savedUrlBogdan = localStorage.getItem('url-bogdan') || 'https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif';
+    document.body.setAttribute('url-bogdan', savedUrlBogdan);
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
 
@@ -598,7 +648,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (savedMode === 'bogdan') {
         screens.forEach(screen => {
-            screen.style.backgroundImage = "url('https://media1.tenor.com/m/2CbEEdBwvJwAAAAd/memeblog-kushaet.gif')";
+            screen.style.backgroundImage = `url('${savedUrlBogdan}')`;
             screen.style.backgroundSize = 'cover';
             screen.style.backgroundRepeat = 'no-repeat';
             screen.style.backgroundPosition = 'center center';
@@ -648,11 +698,11 @@ document.getElementById('btn-force-update').addEventListener('click', async () =
                     button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
                 }
             } else {
-                    // Обновлений нет — информируем пользователя
-                    alert('У Вас уже поледняя версия приложения')
-                    button.disabled = false;
-                    textSpan.textContent = 'Проверить обновления';
-                    button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
+                // Обновлений нет — информируем пользователя
+                alert('У Вас уже поледняя версия приложения')
+                button.disabled = false;
+                textSpan.textContent = 'Проверить обновления';
+                button.innerHTML = `<i class="fas fa-sync"></i> ${textSpan.outerHTML}`;
             }
         } else {
             alert('Сервис‑воркер не зарегистрирован');
